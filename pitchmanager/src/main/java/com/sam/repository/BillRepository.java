@@ -11,6 +11,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
+import java.util.List;
 
 /**
  * Created by vieth on 5/25/2017.
@@ -22,7 +23,7 @@ public class BillRepository {
     private JdbcTemplate jdbcTemplate;
 
     public int add(Bill bill){
-        String sql = "Insert into tblBill(customerId, isFullyPaid) values(?,?)";
+        String sql = "Insert into tblBill(customerId, isFullyPaid, totalPrice, currentlyDebt, currentlyPaid) values(?,?, 0, 0, 0)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(new PreparedStatementCreator() {
             @Override
@@ -35,6 +36,59 @@ public class BillRepository {
         }, keyHolder);
         int billId = keyHolder.getKey().intValue();
         return billId;
+    }
+
+
+    public List<Bill> findAll(){
+        String sql = "Select * from tblBill";
+        return jdbcTemplate.query(sql, new RowMapper<Bill>() {
+            @Override
+            public Bill mapRow(ResultSet resultSet, int i) throws SQLException {
+                Bill bill = new Bill();
+                bill.setFullyPaid(resultSet.getBoolean("isFullyPaid"));
+                bill.setBillId(resultSet.getInt("billId"));
+                bill.setCustomerId(resultSet.getInt("customerId"));
+                Date date = resultSet.getDate("lastPayoutDate");
+                if(date != null){
+                    bill.setLastPayoutDate(date);
+                }
+                bill.setCurrentlyDebt(resultSet.getFloat("currentlyDebt"));
+                bill.setCurrentlyPaid(resultSet.getFloat("currentlyPaid"));
+                bill.setTotalPrice(resultSet.getFloat("totalPrice"));
+                return bill;
+            }
+        });
+    }
+
+    public void updateBillTotalPrice(Bill bill){
+        String sql = "Update tblBill set totalPrice = ?, currentlyDebt = ?, currentlyPaid = 0 where billId = ?";
+        jdbcTemplate.update(sql, bill.getTotalPrice(), bill.getTotalPrice(), bill.getBillId());
+        String getNumOfSlot = "Select count(*) from tblSlotReserve where billId=?";
+        int numOfSlot = jdbcTemplate.queryForObject(getNumOfSlot, Integer.class, bill.getBillId());
+        float slotPrice = bill.getTotalPrice()/numOfSlot;
+        String updateSlotPrice = "Update tblSlotReserve set price = ? where billId = ?";
+        jdbcTemplate.update(updateSlotPrice, slotPrice, bill.getBillId());
+    }
+
+    public Bill getBillById(int billId){
+        String sql = "Select * from tblBill where billId = ?";
+        return jdbcTemplate.queryForObject(sql, new RowMapper<Bill>() {
+            @Override
+            public Bill mapRow(ResultSet resultSet, int i) throws SQLException {
+                Bill bill = new Bill();
+                bill.setFullyPaid(resultSet.getBoolean("isFullyPaid"));
+                bill.setBillId(resultSet.getInt("billId"));
+                bill.setCustomerId(resultSet.getInt("customerId"));
+                Date date = resultSet.getDate("lastPayoutDate");
+                if(date != null){
+                    bill.setLastPayoutDate(date);
+                }
+                bill.setCurrentlyDebt(resultSet.getFloat("currentlyDebt"));
+                bill.setCurrentlyPaid(resultSet.getFloat("currentlyPaid"));
+                bill.setTotalPrice(resultSet.getFloat("totalPrice"));
+                return bill;
+            }
+        }, billId);
     }
 
 }

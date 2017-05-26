@@ -117,4 +117,24 @@ public class HomeController {
         return "Saved";
     }
 
+    @PostMapping("/get-list-bill")
+    public String getListBill(){
+        return new Gson().toJson(billRepository.findAll());
+    }
+
+    @RequestMapping("/bill-detail/{billId}")
+    public ModelAndView seeBillDetails(@PathVariable("billId") int billId){
+        ModelAndView mav = new ModelAndView("bill-details");
+        Bill bill = billRepository.getBillById(billId);
+        mav.addObject("date", slotReserveRepository.findSlotReserveByBillId(billId).get(0).getDate());
+        mav.addObject("bill", bill);
+        mav.addObject("listSlot", slotReserveRepository.getFromTimeToTime(billId));
+        return mav;
+    }
+
+    @PostMapping("/update-reservation-price")
+    public void updateReservationPrice(@RequestBody Bill bill){
+        billRepository.updateBillTotalPrice(bill);
+    }
+
 }

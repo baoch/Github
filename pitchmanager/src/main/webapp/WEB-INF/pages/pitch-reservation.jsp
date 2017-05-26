@@ -15,6 +15,64 @@
 <body>
 <c:import url="navbar.jsp"/>
 <div class="container-fluid">
+    <div class="row col-md-offset-3 col-md-6">
+        <table class="table table-bordered" id="tblBill">
+            <thead>
+                <tr>
+                    <th>Bill ID</th>
+                    <th>Customer ID</th>
+                    <th>Currently Paid</th>
+                    <th>Currently Debt</th>
+                    <th>Total Price</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+            <tfoot>
+                <tr>
+                    <th>Bill ID</th>
+                    <th>Customer ID</th>
+                    <th>Currently Paid</th>
+                    <th>Currently Debt</th>
+                    <th>Total Price</th>
+                    <th></th>
+                </tr>
+            </tfoot>
+        </table>
+        <script>
+            $(document).ready(function() {
+                $('#tblBill').DataTable({
+                    "ajax": {
+                        "type": "POST",
+                        "url": "${pageContext.request.contextPath}/get-list-bill",
+                        "dataSrc": ""
+                    },
+                    "columns": [
+                        {
+                            "data": "billId",
+                            "render":function(data, type, full, meta){
+                                return "<a href='${pageContext.request.contextPath}/bill-detail/"+ data+ "'>" + data + "</a>";
+                            }
+                        },
+                        {"data": "customerId"},
+                        {"data": "currentlyPaid"},
+                        {"data": "currentlyDebt"},
+                        {"data": "totalPrice"},
+                        {
+                            "data": "isFullyPaid",
+                            "render": function(data, type, full, meta){
+                                if(data){
+                                    return "<button class='btn btn-success'>Is Paid</button>"
+                                } else {
+                                    return "<button class='btn btn-warning'>Is currently debt or not calculated yet</button>"
+                                }
+                            }
+                        }
+                    ]
+                });
+            } );
+        </script>
+    </div>
     <div class="row col-md-6 col-md-offset-3">
         <form id="form-reserve" class="form-horizontal">
             <div class="form-group">
@@ -80,6 +138,9 @@
                         $("#result-text").html(result);
                     }
                 });
+                setTimeout(function(){
+                    $('#tblBill').DataTable().ajax.reload(null,false);// reload without come back to the first page
+                }, 1000); //reload the table after 0.2s
             });
         </script>
     </div>

@@ -34,6 +34,9 @@ public class Bill {
     }
 
     public Bill() {
+        totalPrice = 0;
+        currentlyDebt = 0;
+        currentlyPaid = 0;
     }
 
     public int getBillId() {

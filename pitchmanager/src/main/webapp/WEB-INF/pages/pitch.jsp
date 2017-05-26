@@ -81,13 +81,14 @@
             </div>
             <div class="form-group">
                 <label class="label-control">Available: </label>
-                <input type="checkbox" id="add-pitch-statu
+                <input type="checkbox" id="add-pitch-status" class="form-group"/>
+            </div>
+            <div class="form-group">
                 <label class="label-control">Maximum player</label>
                 <select id="add-pitch-type" class="form-control">
                     <c:forEach var="pitchType" items="${listPitchType}">
                         <option value=${pitchType.pitchTypeId}>${pitchType.maxPlayers}</option>
                     </c:forEach>
-
                 </select>
             </div>
             <div class="form-group">
@@ -102,9 +103,7 @@
                 var pitchStatus = $("#add-pitch-status").is(":checked")? true : false;
                 var pitchTypeId = $("#add-pitch-type").val();
                 var pitch = {"pitchName": pitchName, "pitchWidth": pitchWidth, "pitchLength": pitchLength, "status": pitchStatus, "pitchTypeId": pitchTypeId};
-                event.preventDefault();s"/>
-            </div>
-            <div class="form-group">
+                event.preventDefault();
                 $.ajax({
                     type: "POST",
                     url: "${pageContext.request.contextPath}/save-pitch",
